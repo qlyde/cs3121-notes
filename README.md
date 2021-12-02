@@ -9,6 +9,7 @@
 1. [Introduction](#introduction)
     - [Proofs](#proofs)
     - [Stable Matching Problem](#stable-matching-problem)
+        * [Gale-Shapley Algorithm](#gale-shapley-algorithm)
 2. [Divide and Conquer](#divide-and-conquer)
     - [Landau Notation](#landau-notation)
     - [Counting Inversions](#counting-inversions)
@@ -22,12 +23,16 @@
     - [Complex Numbers](#complex-numbers)
     - [The Fast Fourier Transform](#the-fast-fourier-transform)
 6. [The Greedy Method](#the-greedy-method)
-    - [Single Source Shortest Paths](#single-source-shortest-paths)
+    - [Single Source Shortest Paths I](#single-source-shortest-paths-i)
         * [Dijkstra's Shortest Paths Algorithm](#dijkstras-shortest-paths-algorithm)
     - [Minimum Spanning Trees](#minimum-spanning-trees)
         * [Kruskal's Algorithm](#kruskals-algorithm)
         * [Union-Find](#union-find)
 7. [Dynamic Programming](#dynamic-programming)
+    - [Single Source Shortest Paths II](#single-source-shortest-paths-ii)
+        * [Bellman-Ford Algorithm](#bellman-ford-algorithm)
+    - [All Pairs Shortest Paths](#all-pairs-shortest-paths)
+        * [Floyd-Warshall Algorithm](#floyd-warshall-algorithm)
 8. [Maximum Flow](#maximum-flow)
     - [Flow Networks](#flow-networks)
     - [Residual Flow Networks](#residual-flow-networks)
@@ -36,6 +41,18 @@
         * [Ford-Fulkerson Algorithm](#ford-fulkerson-algorithm)
         * [Edmonds-Karp Algorithm](#edmonds-karp-algorithm)
     - [Applications of Network Flow](#applications-of-network-flow)
+    - [Bipartite Graphs](#bipartite-graphs)
+9. [String Matching](#string-matching)
+    - [Hashing](#hashing)
+        * [Rabin-Karp Algorithm](#rabin-karp-algorithm)
+    - [Finite Automata](#finite-automata)
+        * [Knuth-Morris-Pratt Algorithm](#knuth-morris-pratt-algorithm)
+10. [Linear Programming](#linear-programming)
+    - [Weak Duality Theorem](#weak-duality-theorem)
+11. [Intractability](#intractability)
+    - [Feasibility of Algorithms](#feasibility-of-algorithms)
+    - [Polynomial Reductions](#polynomial-reductions)
+    - [Optimisation Problems](#optimisation-problems)
 
 ***
 
@@ -406,7 +423,7 @@ X X X X X X X X  result of length 2n
 * **See the example problems in [Lectures 6-8](resources/6-greedy.pdf).**
 * [Proving Correctness of Greedy Algorithms](resources/proving-correctness-of-greedy-algorithms.pdf)
 
-### Single Source Shortest Paths
+### Single Source Shortest Paths I
 
 * Suppose we have a **directed graph** <img src="https://render.githubusercontent.com/render/math?math=G = (V, E)"> with *non-negative* weight <img src="https://render.githubusercontent.com/render/math?math=w(e) \geq 0"> assigned to each edge <img src="https://render.githubusercontent.com/render/math?math=e \in E"> and a designated (source) vertex <img src="https://render.githubusercontent.com/render/math?math=v \in V">.
 * We want to find for every <img src="https://render.githubusercontent.com/render/math?math=u \in V"> the shortest path from <img src="https://render.githubusercontent.com/render/math?math=v"> to <img src="https://render.githubusercontent.com/render/math?math=u">.
@@ -481,6 +498,47 @@ X X X X X X X X  result of length 2n
 * The **time complexity** of our algorithm is usually given by multiplying the *number of subproblems* by the *average time taken to solve a subproblem using the recurrence*.
 * **See the example problems in [Lectures 9-11](resources/7-dp.pdf).**
 * **Notation.** <img src="https://render.githubusercontent.com/render/math?math=\underset{1 \leq m \leq n}{\argmin} \ \text{opt}(i - v_m)"> is the value of <img src="https://render.githubusercontent.com/render/math?math=m"> that minimises <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i - v_m)">. We also have <img src="https://render.githubusercontent.com/render/math?math=\argmax">.
+
+### Single Source Shortest Paths II
+
+* Suppose we have a directed weighted graph <img src="https://render.githubusercontent.com/render/math?math=G = (V, E)"> with edge weights <img src="https://render.githubusercontent.com/render/math?math=w(e)"> which **can be negative**, but without cycles of negative total weight, and a (source) vertex <img src="https://render.githubusercontent.com/render/math?math=s \in V">.
+* We want to find the weight of the shortest path from vertex <img src="https://render.githubusercontent.com/render/math?math=s"> to every other vertex <img src="https://render.githubusercontent.com/render/math?math=t">.
+* This differs to the SSSP problem solved by **Dijkstra's algorithm** because we allow **negative edge weights**, so the greedy strategy no longer works.
+* We disallow cycles of negative total weight because with such a cycle, there is no shortest path. You can take as many laps around a negative cycle as you like.
+
+#### Bellman-Ford Algorithm
+
+> For any vertex <img src="https://render.githubusercontent.com/render/math?math=t">, there is a shortest <img src="https://render.githubusercontent.com/render/math?math=s \rightarrow t"> path without cycles.
+>
+> It follows that every shortest <img src="https://render.githubusercontent.com/render/math?math=s \rightarrow t"> path contains any vertex <img src="https://render.githubusercontent.com/render/math?math=v"> at most once, and therefore has at most <img src="https://render.githubusercontent.com/render/math?math=|V| - 1"> edges.
+
+* For every vertex <img src="https://render.githubusercontent.com/render/math?math=t">, let us find the weight of a shortest <img src="https://render.githubusercontent.com/render/math?math=s \rightarrow t"> path consisting of at most <img src="https://render.githubusercontent.com/render/math?math=i"> edges, for each <img src="https://render.githubusercontent.com/render/math?math=i"> up to <img src="https://render.githubusercontent.com/render/math?math=|V| - 1">.
+* Suppose the path in question is <img src="https://render.githubusercontent.com/render/math?math=p = \underbrace{s \rightarrow \ldots \rightarrow v}_{p'} \rightarrow t">, with the final edge going from <img src="https://render.githubusercontent.com/render/math?math=v"> to <img src="https://render.githubusercontent.com/render/math?math=t">.
+* Then, <img src="https://render.githubusercontent.com/render/math?math=p'"> must be itself the shortest path from <img src="https://render.githubusercontent.com/render/math?math=s"> to <img src="https://render.githubusercontent.com/render/math?math=v"> of at most <img src="https://render.githubusercontent.com/render/math?math=i - 1"> edges, which is another *subproblem*.
+* No such recursion is necessary if <img src="https://render.githubusercontent.com/render/math?math=t = s"> or if <img src="https://render.githubusercontent.com/render/math?math=i = 0">.
+* **Subproblems.** For all <img src="https://render.githubusercontent.com/render/math?math=0 \leq i \leq |V| - 1"> and all <img src="https://render.githubusercontent.com/render/math?math=t \in V">, let <img src="https://render.githubusercontent.com/render/math?math=P(i, t)"> be the problem of determining <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i,t)">, the length of a shortest path from <img src="https://render.githubusercontent.com/render/math?math=s"> to <img src="https://render.githubusercontent.com/render/math?math=t"> which contains at most <img src="https://render.githubusercontent.com/render/math?math=i"> edges.
+* **Recurrence.** For all <img src="https://render.githubusercontent.com/render/math?math=i > 0"> and <img src="https://render.githubusercontent.com/render/math?math=t \neq s">, <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i, t) = \min\{\text{opt}(i - 1, v) %2B w(v,t) | (v, t) \in E\}">.
+* **Base cases.** <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i,s) = 0"> and for <img src="https://render.githubusercontent.com/render/math?math=t \neq s">, <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(0, t) = \infty">.
+* The **overall solutions** are given by <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(|V| - 1, t)">.
+* We proceed in <img src="https://render.githubusercontent.com/render/math?math=|V|"> rounds (<img src="https://render.githubusercontent.com/render/math?math=i = 0, 1, \ldots, |V| - 1">). In each round, each edge of the graph is considered only once. Therefore the **time complexity** is <img src="https://render.githubusercontent.com/render/math?math=O(|V||E|)">.
+* This method is sometimes called **relaxation** because we progressively relax the additional constraint on how many edges the shortest paths can contain.
+* The **SPFA (Shortest Paths Faster Algorithm)** speeds up the later rounds by ignoring some edges. This optimisation and others (e.g. early exit) do not change the worst case time complexity.
+* The Bellman-Ford algorithm can be augmented to *detect* cycles of negative weight.
+
+### All Pairs Shortest Paths
+
+* Suppose we have a directed weighted graph <img src="https://render.githubusercontent.com/render/math?math=G = (V, E)"> with edge weights <img src="https://render.githubusercontent.com/render/math?math=w(e)"> which can be negative, but without cycles of negative total weight.
+* We want to find the weight of the shortest path from every vertex <img src="https://render.githubusercontent.com/render/math?math=s"> to every other vertex <img src="https://render.githubusercontent.com/render/math?math=t">.
+
+#### Floyd-Warshall Algorithm
+
+* Label the vertices of <img src="https://render.githubusercontent.com/render/math?math=V"> as <img src="https://render.githubusercontent.com/render/math?math=v_1, v_2, \ldots, v_n"> where <img src="https://render.githubusercontent.com/render/math?math=n = |V|">.
+* Let <img src="https://render.githubusercontent.com/render/math?math=S"> be the set of vertices allowed as intermediate vertices. Initially <img src="https://render.githubusercontent.com/render/math?math=S"> is empty, and we add vertices <img src="https://render.githubusercontent.com/render/math?math=v_1, v_2, \ldots, v_n"> one at a time.
+* **Subproblems.** For all <img src="https://render.githubusercontent.com/render/math?math=1 \leq i, j \leq n"> and <img src="https://render.githubusercontent.com/render/math?math=0 \leq k \leq n">, let <img src="https://render.githubusercontent.com/render/math?math=P(i, j, k)"> be the problem of determining <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i, j, k)">, the weight of a shortest path from <img src="https://render.githubusercontent.com/render/math?math=v_i"> to <img src="https://render.githubusercontent.com/render/math?math=v_j"> using only <img src="https://render.githubusercontent.com/render/math?math=v_1, \ldots, v_k"> as intermediate vertices.
+* **Recurrence.** For all <img src="https://render.githubusercontent.com/render/math?math=1 \leq i, j, k \leq n">, <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i, j, k) = \min(\text{opt}(i,j,k-1), \text{opt}(i, k, k - 1) %2B \text{opt}(k, j, k - 1))">.
+* **Base cases.** <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i, j, 0) = \begin{cases}0 %26 \text{if } i = j \\ w(i, j) %26 \text{if } (v_i, v_j) \in E \\ \infty %26 \text{otherwise}\end{cases}">.
+* The **overall solutions** are given by <img src="https://render.githubusercontent.com/render/math?math=\text{opt}(i, j, n)">, where all vertices are allowed as intermediates.
+* Each of <img src="https://render.githubusercontent.com/render/math?math=O(|V|^3)"> subproblems is solved in constant time, so the **time complexity** is <img src="https://render.githubusercontent.com/render/math?math=O(|V|^3)">.
 
 ## Maximum Flow
 
@@ -577,12 +635,17 @@ X X X X X X X X  result of length 2n
 
 * Since all edges from <img src="https://render.githubusercontent.com/render/math?math=S"> to <img src="https://render.githubusercontent.com/render/math?math=T"> are occupied with flows to their full capacity, and also there is no flow from <img src="https://render.githubusercontent.com/render/math?math=T"> to <img src="https://render.githubusercontent.com/render/math?math=S">, then <img src="https://render.githubusercontent.com/render/math?math=f(S,T) = c(S,T) = |f|">. Thus, such a flow is maximal and the corresponding cut is a minimal cut.
 * The Ford-Fulkerson algorithm can potentially run in **time proportional to the value of the max flow**, which can be **exponential in the size of the input**.
+* In a flow network, <img src="https://render.githubusercontent.com/render/math?math=|V| \leq |E| %2B 1"> otherwise there are vertices other than the source which don't have any incoming edges, or vertices other than the sink which don't have any outgoing edges. We therefore simplify <img src="https://render.githubusercontent.com/render/math?math=O(|V| %2B |E|)"> to <img src="https://render.githubusercontent.com/render/math?math=O(|E|)">.
+* The Ford-Fulkerson algorithm has worst-case time complexity of <img src="https://render.githubusercontent.com/render/math?math=O(|E|f)"> where <img src="https://render.githubusercontent.com/render/math?math=f"> is the value of a maximum flow. In general if there are <img src="https://render.githubusercontent.com/render/math?math=m"> edges in the graph, each of capacity <img src="https://render.githubusercontent.com/render/math?math=C">, then <img src="https://render.githubusercontent.com/render/math?math=f"> may be up to <img src="https://render.githubusercontent.com/render/math?math=mC">. Since the edge capacities are specified using only <img src="https://render.githubusercontent.com/render/math?math=m\log_{2}{C}"> bits, the algorithm does not run in polynomial time in general.
+* In some circumstances the time complexity of the Ford-Fulkerson algorithm is <img src="https://render.githubusercontent.com/render/math?math=O(|E||V|)">.
 
 #### Edmonds-Karp Algorithm
 
 * The Edmonds-Karp algorithm improves the Ford-Fulkerson algorithm in a simple way: always choose the shortest path from the source <img src="https://render.githubusercontent.com/render/math?math=s"> to the sink <img src="https://render.githubusercontent.com/render/math?math=t">, where the "shortest path" means the fewest number of edges, regardless of their capacities.
 * This algorithm runs in <img src="https://render.githubusercontent.com/render/math?math=O(|V||E|^2)"> time.
 * The **fastest** max flow algorithm to date is an extension of the **Preflow-Push** algorithm and runs in time <img src="https://render.githubusercontent.com/render/math?math=|V|^3">.
+* The Edmonds-Karp algorithm is a specialisation of the Ford-Fulkerson algorithm, so its time complexity is also bounded by <img src="https://render.githubusercontent.com/render/math?math=O(|E|f)">. It can be proved that it finds <img src="https://render.githubusercontent.com/render/math?math=O(|V||E|)"> augmenting paths, each in <img src="https://render.githubusercontent.com/render/math?math=O(|E|)"> time using BFS, so an alternative bound for its time complexity is <img src="https://render.githubusercontent.com/render/math?math=O(|V||E|^2)">.
+* The time complexity can be written <img src="https://render.githubusercontent.com/render/math?math=O(\min(|V||E|^2, |E|f))">.
 
 ### Applications of Network Flow
 
@@ -594,3 +657,265 @@ X X X X X X X X  result of length 2n
 * We can also reduce this to a situation with **only edge capacities**. Suppose vertex <img src="https://render.githubusercontent.com/render/math?math=v"> has capacity <img src="https://render.githubusercontent.com/render/math?math=C(v)">. Split <img src="https://render.githubusercontent.com/render/math?math=v"> into two vertices <img src="https://render.githubusercontent.com/render/math?math=v_{in}"> and <img src="https://render.githubusercontent.com/render/math?math=v_{out}">. Attach all of <img src="https://render.githubusercontent.com/render/math?math=v">'s incoming edges to <img src="https://render.githubusercontent.com/render/math?math=v_{in}"> and all its outgoing edges from <img src="https://render.githubusercontent.com/render/math?math=v_{out}">. Connect <img src="https://render.githubusercontent.com/render/math?math=v_{in}"> and <img src="https://render.githubusercontent.com/render/math?math=v_{out}"> with an edge <img src="https://render.githubusercontent.com/render/math?math=e^* = (v_{in}, v_{out})"> of capacity <img src="https://render.githubusercontent.com/render/math?math=C(v)">.
 
 ![vertex-capacities](images/vertex-capacities.png)
+
+### Bipartite Graphs
+
+> A graph <img src="https://render.githubusercontent.com/render/math?math=G = (V, E)"> is said to be **bipartite** if its vertices can be divided into two disjoint sets <img src="https://render.githubusercontent.com/render/math?math=A"> and <img src="https://render.githubusercontent.com/render/math?math=B"> such that every edge <img src="https://render.githubusercontent.com/render/math?math=e \in E"> has one end in the set <img src="https://render.githubusercontent.com/render/math?math=A"> and the other in the set <img src="https://render.githubusercontent.com/render/math?math=B">.
+
+* A **matching** in a graph <img src="https://render.githubusercontent.com/render/math?math=G = (V, E)"> is a subset <img src="https://render.githubusercontent.com/render/math?math=M \subseteq E"> such that each vertex of the graph belongs to at most one edge in <img src="https://render.githubusercontent.com/render/math?math=M">.
+* A **maximum matching** in <img src="https://render.githubusercontent.com/render/math?math=G"> is a matching containing the largest possible number of edges.
+
+![matchings-bipartite](images/matchings-bipartite.png)
+
+* We can turn a **Maximum Bipartite Matching** problem into a **Maximum Flow** problem: Create two new vertices <img src="https://render.githubusercontent.com/render/math?math=s"> and <img src="https://render.githubusercontent.com/render/math?math=t"> (the source and sink). Construct an edge from <img src="https://render.githubusercontent.com/render/math?math=s"> to each vertex in <img src="https://render.githubusercontent.com/render/math?math=A">, and from each vertex in <img src="https://render.githubusercontent.com/render/math?math=B"> to <img src="https://render.githubusercontent.com/render/math?math=t">. Orient the existing edges from <img src="https://render.githubusercontent.com/render/math?math=A"> to <img src="https://render.githubusercontent.com/render/math?math=B">. Assign capacity 1 to all edges.
+* Since all capacities in the flow network are 1, we need only denote the *direction* of the edge in the residual graph.
+
+![max-bipartite-matching](images/max-bipartite-matching.png)
+![max-bipartite-matching](images/max-bipartite-matching-1.png)
+
+## String Matching
+
+* Suppose you have an alphabet <img src="https://render.githubusercontent.com/render/math?math=S = \{s_0, s_1, \ldots, s_{d-1}\}"> of <img src="https://render.githubusercontent.com/render/math?math=d"> characters.
+* You want to determine whether a string <img src="https://render.githubusercontent.com/render/math?math=B = b_0 b_1 \ldots b_{m-1}"> appears as a *contiguous* substring of a much longer string <img src="https://render.githubusercontent.com/render/math?math=A = a_0 a_1 \ldots a_{n-1}">.
+* The *naive* string matching algorithm runs in <img src="https://render.githubusercontent.com/render/math?math=O(nm)">.
+
+### Hashing
+
+#### Rabin-Karp Algorithm
+
+* We compute a hash value for the string <img src="https://render.githubusercontent.com/render/math?math=B = b_0 b_1 b_2 \ldots b_{m-1}"> in the following way:
+    - First, map each symbol <img src="https://render.githubusercontent.com/render/math?math=s_i"> to a corresponding integer <img src="https://render.githubusercontent.com/render/math?math=i">: <img src="https://render.githubusercontent.com/render/math?math=S = \{s_0, s_1, s_2, \ldots, s_{d-1}\} \rightarrow \{0, 1, 2, \ldots, d-1\}">, so as to identify each string with a sequence of these integers.
+    - Then, when we refer to an integer <img src="https://render.githubusercontent.com/render/math?math=a_i"> or <img src="https://render.githubusercontent.com/render/math?math=b_i">, we refer to the ID of the symbol <img src="https://render.githubusercontent.com/render/math?math=a_i"> or <img src="https://render.githubusercontent.com/render/math?math=b_i">.
+    - We can therefore identify <img src="https://render.githubusercontent.com/render/math?math=B"> with a sequence of IDs <img src="https://render.githubusercontent.com/render/math?math=\langle b_0, b_1, b_2, \ldots, b_{m-1} \rangle">, each between 0 and <img src="https://render.githubusercontent.com/render/math?math=d-1"> inclusive. Viewing these IDs as digits in base <img src="https://render.githubusercontent.com/render/math?math=d">, we can construct a corresponding integer <img src="https://render.githubusercontent.com/render/math?math=h(B) = h(b_0 b_1 b_2 \ldots b_{m-1}) = d^{m-1}b_0 %2B d^{m-2}b_1 %2B \ldots %2B db_{m-2} %2B b_{m-1}">.
+    - This can be evaluated efficiently using **Horner's rule**: <img src="https://render.githubusercontent.com/render/math?math=h(B) = b_{m-1} %2B d(b_{m-2} %2B d(b_{m-3} %2B d(b_{m-4} %2B \ldots %2B d(b_1 %2B db_0)\ldots)))">, requiring only <img src="https://render.githubusercontent.com/render/math?math=m-1"> additions and <img src="https://render.githubusercontent.com/render/math?math=m-1"> multiplications.
+    - Next we choose a large prime number <img src="https://render.githubusercontent.com/render/math?math=p"> and define the hash value of <img src="https://render.githubusercontent.com/render/math?math=B"> as <img src="https://render.githubusercontent.com/render/math?math=H(B) = h(B) \mod{p}">. We require that <img src="https://render.githubusercontent.com/render/math?math=(d%2B1)p"> fits in a register.
+* Recall that <img src="https://render.githubusercontent.com/render/math?math=A = a_0 a_1 a_2 a_3 \ldots a_s a_{s%2B1} \ldots a_{s%2Bm-1} \ldots a_{n-1}"> where <img src="https://render.githubusercontent.com/render/math?math=n \gg m">.
+* We want to efficiently find all <img src="https://render.githubusercontent.com/render/math?math=s"> such that the string of length <img src="https://render.githubusercontent.com/render/math?math=m"> of the form <img src="https://render.githubusercontent.com/render/math?math=a_s a_{s%2B1} \ldots a_{s%2Bm-1}"> and string <img src="https://render.githubusercontent.com/render/math?math=b_0 b_1 \ldots b_{m-1}"> are equal.
+* For each contiguous substring <img src="https://render.githubusercontent.com/render/math?math=A_s = a_s a_{s%2B1} \ldots a_{s%2Bm-1}"> of string <img src="https://render.githubusercontent.com/render/math?math=A"> we also compute its hash value as <img src="https://render.githubusercontent.com/render/math?math=H(A_s) = d^{m-1} a_s %2B d^{m-2} a_{s%2B1} %2B \ldots %2B d^1 a_{s%2Bm-2} %2B a_{s%2Bm-1} \mod{p}">.
+* We can now compare the hash values <img src="https://render.githubusercontent.com/render/math?math=H(B)"> and <img src="https://render.githubusercontent.com/render/math?math=H(A_s)"> and do a symbol-by-symbol matching only if <img src="https://render.githubusercontent.com/render/math?math=H(B) = H(A_s)">.
+* Such an algorithm would only be faster than the naive symbol-by-symbol comparison only if we can compute the hash values of substrings <img src="https://render.githubusercontent.com/render/math?math=A_s"> faster than comparing strings <img src="https://render.githubusercontent.com/render/math?math=B"> and <img src="https://render.githubusercontent.com/render/math?math=A_s"> character by character.
+* We use **recursion**: we compute <img src="https://render.githubusercontent.com/render/math?math=H(A_{s%2B1})"> efficiently from <img src="https://render.githubusercontent.com/render/math?math=H(A_s)"> by doing the following:
+    - Since <img src="https://render.githubusercontent.com/render/math?math=H(A_s) = d^{m-1} a_s %2B d^{m-2} a_{s%2B1} %2B \ldots %2B d^1 a_{s%2Bm-2} %2B a_{s%2Bm-1} \mod{p}">, then by multiplying both sides by <img src="https://render.githubusercontent.com/render/math?math=d"> we obtain <img src="https://render.githubusercontent.com/render/math?math=\begin{align*} d %26 \cdot H(A_s) \\ %26= d^m a_s %2B d^{m-1}a_{s%2B1} %2B \ldots %2B d^1 a_{s%2Bm-1} \\ %26=  d^m a_s %2B (d^{m-1} a_{s%2B1} %2B \ldots %2B d^1 a_{s%2Bm-1} %2B a_{s%2Bm}) - a_{s%2Bm} \\ %26= d^m a_s %2B H(A_{s%2B1}) - a_{s%2Bm} \mod{p} \end{align*}">
+    - Consequently, <img src="https://render.githubusercontent.com/render/math?math=H(A_{s%2B1}) = d \cdot H(A_s) - d^m a_s %2B a_{s%2Bm} \mod{p}">.
+    - To find <img src="https://render.githubusercontent.com/render/math?math=d^m a_s \mod{p}">, we use the precomputed value <img src="https://render.githubusercontent.com/render/math?math=d^m \mod{p}">, multiply it by <img src="https://render.githubusercontent.com/render/math?math=a_s"> and again take the remainder modulo <img src="https://render.githubusercontent.com/render/math?math=p">.
+    - Also, since <img src="https://render.githubusercontent.com/render/math?math=(-d^m a_s %2B a_{s%2Bm}) \mod{p}"> and <img src="https://render.githubusercontent.com/render/math?math=H(A_s)"> are each less than <img src="https://render.githubusercontent.com/render/math?math=p">, it follows that <img src="https://render.githubusercontent.com/render/math?math=d \cdot H(A_s) %2B [(-d^m a_s %2B a_{s%2Bm}) \mod{p}] < (d%2B1)p">.
+    - Thus, since we chose <img src="https://render.githubusercontent.com/render/math?math=p"> such that <img src="https://render.githubusercontent.com/render/math?math=(d%2B1)p"> fits in a single register, all the values and the intermediate results for the above expression also fit in a single register.
+* Thus, we first compute <img src="https://render.githubusercontent.com/render/math?math=H(B)"> and <img src="https://render.githubusercontent.com/render/math?math=H(A_0)"> using Horner's rule.
+* The <img src="https://render.githubusercontent.com/render/math?math=O(n)"> subsequent values of <img src="https://render.githubusercontent.com/render/math?math=H(A_s)"> for <img src="https://render.githubusercontent.com/render/math?math=s > 0"> are computed in constant time using the above recursion.
+* <img src="https://render.githubusercontent.com/render/math?math=H(A_s)"> is compared with <img src="https://render.githubusercontent.com/render/math?math=H(B)"> and if they are equal the strings <img src="https://render.githubusercontent.com/render/math?math=A_s"> and <img src="https://render.githubusercontent.com/render/math?math=B"> are compared by brute force character-by-character to confirm whether they are genuinely equal.
+* Since <img src="https://render.githubusercontent.com/render/math?math=p"> was chosen large, the false positives when <img src="https://render.githubusercontent.com/render/math?math=H(A_s) = H(B)"> but <img src="https://render.githubusercontent.com/render/math?math=A_s \neq B"> are very unlikely, which makes the algorithm **run fast in the average case**.
+* However, when we use hashing we cannot achieve useful bounds for the worst case performance.
+
+### Finite Automata
+
+* A string matching finite automaton for a pattern <img src="https://render.githubusercontent.com/render/math?math=B"> of length <img src="https://render.githubusercontent.com/render/math?math=m"> has:
+    - <img src="https://render.githubusercontent.com/render/math?math=m%2B1"> many states <img src="https://render.githubusercontent.com/render/math?math=0, 1, \ldots, m"> which correspond to the number of characters matched thus far, and
+    - a transition function <img src="https://render.githubusercontent.com/render/math?math=\delta (s,c)"> where <img src="https://render.githubusercontent.com/render/math?math=0 \leq s \leq m"> and <img src="https://render.githubusercontent.com/render/math?math=c \in S">. <img src="https://render.githubusercontent.com/render/math?math=\delta (s,c)"> is the state you go to if you were in state <img src="https://render.githubusercontent.com/render/math?math=s"> and then saw a character <img src="https://render.githubusercontent.com/render/math?math=c">.
+* Suppose that the last <img src="https://render.githubusercontent.com/render/math?math=s"> characters of the text <img src="https://render.githubusercontent.com/render/math?math=A"> match the first <img src="https://render.githubusercontent.com/render/math?math=s"> characters of the pattern <img src="https://render.githubusercontent.com/render/math?math=B">, and that <img src="https://render.githubusercontent.com/render/math?math=c"> is the next character in the text. Then <img src="https://render.githubusercontent.com/render/math?math=\delta (s,c)"> is the new state after character <img src="https://render.githubusercontent.com/render/math?math=c"> is read, i.e. the largest <img src="https://render.githubusercontent.com/render/math?math=s'"> so that the last <img src="https://render.githubusercontent.com/render/math?math=s'"> characters of <img src="https://render.githubusercontent.com/render/math?math=A"> (ending at the new character <img src="https://render.githubusercontent.com/render/math?math=c">) match the first <img src="https://render.githubusercontent.com/render/math?math=s'"> characters of <img src="https://render.githubusercontent.com/render/math?math=B">.
+* We first suppose that <img src="https://render.githubusercontent.com/render/math?math=\delta (s,c)"> is given as a pre-constructed table. For example, if <img src="https://render.githubusercontent.com/render/math?math=B = xyxyxzx">, then the table defining <img src="https://render.githubusercontent.com/render/math?math=\delta (s,c)"> would be:
+
+![string-matching-finite-automata](images/string-matching-finite-automata.png)
+![string-matching-finite-automata](images/string-matching-finite-automata-1.png)
+
+* To compute the transition function <img src="https://render.githubusercontent.com/render/math?math=\delta"> (this table):
+    - Let <img src="https://render.githubusercontent.com/render/math?math=B_k = b_0 \ldots b_{k-1}"> denote a prefix of length <img src="https://render.githubusercontent.com/render/math?math=k"> of the string <img src="https://render.githubusercontent.com/render/math?math=B">.
+    - Being at state <img src="https://render.githubusercontent.com/render/math?math=k"> means that so far we have matched the prefix <img src="https://render.githubusercontent.com/render/math?math=B_k">.
+    - If we now see an input character <img src="https://render.githubusercontent.com/render/math?math=a">, then <img src="https://render.githubusercontent.com/render/math?math=\delta (k, a)"> is the largest <img src="https://render.githubusercontent.com/render/math?math=m"> such that the prefix <img src="https://render.githubusercontent.com/render/math?math=B_m"> of string <img src="https://render.githubusercontent.com/render/math?math=B"> is a suffix of the string <img src="https://render.githubusercontent.com/render/math?math=B_k a">.
+    - In the particular case where <img src="https://render.githubusercontent.com/render/math?math=a = b_k">, i.e. <img src="https://render.githubusercontent.com/render/math?math=B_k a = B_{k%2B1}">, then <img src="https://render.githubusercontent.com/render/math?math=m = k %2B 1"> and so <img src="https://render.githubusercontent.com/render/math?math=\delta (k, a) = k %2B 1">.
+    - If <img src="https://render.githubusercontent.com/render/math?math=a \neq b_k"> however, we cant extend our match from length <img src="https://render.githubusercontent.com/render/math?math=k"> to <img src="https://render.githubusercontent.com/render/math?math=k%2B1">. To find <img src="https://render.githubusercontent.com/render/math?math=\delta (k, a)">, the largest <img src="https://render.githubusercontent.com/render/math?math=m"> such that <img src="https://render.githubusercontent.com/render/math?math=B_m"> is a suffix of <img src="https://render.githubusercontent.com/render/math?math=B_k a">, we match the string against itself: we can recursively compute a function <img src="https://render.githubusercontent.com/render/math?math=\pi (k)"> which for each <img src="https://render.githubusercontent.com/render/math?math=k"> returns the largest integer <img src="https://render.githubusercontent.com/render/math?math=m"> such that the prefix <img src="https://render.githubusercontent.com/render/math?math=B_m"> of <img src="https://render.githubusercontent.com/render/math?math=B"> is a proper suffix of <img src="https://render.githubusercontent.com/render/math?math=B_k">.
+    - Suppose we have already found that <img src="https://render.githubusercontent.com/render/math?math=\pi (k)">, i.e. <img src="https://render.githubusercontent.com/render/math?math=B_{\pi (k)} = b_0 \ldots b_{\pi (k) - 1}"> is the longest prefix of <img src="https://render.githubusercontent.com/render/math?math=B"> which is a proper suffix of <img src="https://render.githubusercontent.com/render/math?math=B_k">.
+    - To compute <img src="https://render.githubusercontent.com/render/math?math=\pi (k%2B1)">, we first check whether <img src="https://render.githubusercontent.com/render/math?math=b_k = b_{\pi (k)}">.
+        * If true, then <img src="https://render.githubusercontent.com/render/math?math=\pi (k%2B1) = \pi(k) %2B 1">.
+        * If false, then we cannot extend <img src="https://render.githubusercontent.com/render/math?math=B_{\pi (k)}">. The next longest prefix of <img src="https://render.githubusercontent.com/render/math?math=B"> which is a proper suffix of <img src="https://render.githubusercontent.com/render/math?math=B_k"> is <img src="https://render.githubusercontent.com/render/math?math=B_{\pi (\pi (k))}">, so we check whether <img src="https://render.githubusercontent.com/render/math?math=b_k = b_{\pi (\pi (k))}">.
+            - If true, then <img src="https://render.githubusercontent.com/render/math?math=\pi (k%2B1) = \pi (\pi (k)) %2B 1">.
+            - If false, then check whether <img src="https://render.githubusercontent.com/render/math?math=b_k = b_{\pi (\pi (\pi (k)))}">, and so on...
+
+#### Knuth-Morris-Pratt Algorithm
+
+![knuth-morris-pratt](images/knuth-morris-pratt.png)
+
+* There are <img src="https://render.githubusercontent.com/render/math?math=O(m)"> values of <img src="https://render.githubusercontent.com/render/math?math=k">, and for each we might try several values <img src="https://render.githubusercontent.com/render/math?math=l">.
+* We maintain two pointers: the left pointer <img src="https://render.githubusercontent.com/render/math?math=k %2B 1 - l"> (the start of the match we are trying to extend) and the right pointer at <img src="https://render.githubusercontent.com/render/math?math=k">.
+* After each step of the algorithm (i.e. each comparison between <img src="https://render.githubusercontent.com/render/math?math=b_k"> and <img src="https://render.githubusercontent.com/render/math?math=b_l">), exactly one of these two pointers is moved forwards.
+* Each can take up to <img src="https://render.githubusercontent.com/render/math?math=m"> values, so the total number of steps is <img src="https://render.githubusercontent.com/render/math?math=O(m)">. This is an example of **amortisation**.
+* The **time complexity** of this algorithm is linear <img src="https://render.githubusercontent.com/render/math?math=O(m)">.
+* We can now do our search for string <img src="https://render.githubusercontent.com/render/math?math=B"> in a longer string <img src="https://render.githubusercontent.com/render/math?math=A">.
+* Suppose <img src="https://render.githubusercontent.com/render/math?math=B_s"> is the longest prefix of <img src="https://render.githubusercontent.com/render/math?math=B"> which is a suffix of <img src="https://render.githubusercontent.com/render/math?math=A_i = a_0 \ldots a_{i-1}">.
+* To answer the same question for <img src="https://render.githubusercontent.com/render/math?math=A_{i%2B1}">, we begin by checking whether <img src="https://render.githubusercontent.com/render/math?math=a_i = b_s">.
+    - If true, then the answer for <img src="https://render.githubusercontent.com/render/math?math=A_{i%2B1}"> is <img src="https://render.githubusercontent.com/render/math?math=s%2B1">.
+    - If false, check whether <img src="https://render.githubusercontent.com/render/math?math=a_i = b_{\pi (s)}">...
+* If the answer for any <img src="https://render.githubusercontent.com/render/math?math=A_i"> is <img src="https://render.githubusercontent.com/render/math?math=m">, we have a match.
+    - Reset to state <img src="https://render.githubusercontent.com/render/math?math=\pi (m)"> to detect any overlapping full matches.
+* By the same two pointer argument, the time complexity is <img src="https://render.githubusercontent.com/render/math?math=O(n)">.
+
+![knuth-morris-pratt](images/knuth-morris-pratt-1.png)
+![knuth-morris-pratt](images/knuth-morris-pratt-2.png)
+
+#### Looking for Imperfect Matches
+
+* Given a very long string <img src="https://render.githubusercontent.com/render/math?math=A = a_0 a_1 a_2 a_3 \ldots a_s a_{s%2B1} \ldots a_{s%2Bm-1} \ldots a_{n-1}">, a shorter string <img src="https://render.githubusercontent.com/render/math?math=B = b_0 b_1 b_2 \ldots b_{m-1}">, where <img src="https://render.githubusercontent.com/render/math?math=m \ll n">, and an integer <img src="https://render.githubusercontent.com/render/math?math=k \ll m">, we want to find all matches for <img src="https://render.githubusercontent.com/render/math?math=B"> in <img src="https://render.githubusercontent.com/render/math?math=A"> which have **up to <img src="https://render.githubusercontent.com/render/math?math=k"> errors**.
+* We split <img src="https://render.githubusercontent.com/render/math?math=B"> into <img src="https://render.githubusercontent.com/render/math?math=k%2B1"> substrings of (approximately) equal length. Then any match in <img src="https://render.githubusercontent.com/render/math?math=A"> with at most <img src="https://render.githubusercontent.com/render/math?math=k"> errors must contain a substring which is a perfect match for a substring of <img src="https://render.githubusercontent.com/render/math?math=B">.
+* We look for all perfect matches in <img src="https://render.githubusercontent.com/render/math?math=A"> for each of the <img src="https://render.githubusercontent.com/render/math?math=k%2B1"> parts of <img src="https://render.githubusercontent.com/render/math?math=B">. For every match, we test by brute force whether the remaining parts of <img src="https://render.githubusercontent.com/render/math?math=B"> match sufficiently with the appropriate parts of <img src="https://render.githubusercontent.com/render/math?math=A">.
+
+## Linear Programming
+
+* In the **standard form** the **objective** to be **maximised** is given by <img src="https://render.githubusercontent.com/render/math?math=\sum_{j=1}^n c_j x_j"> and the **constraints** are of the form:
+    - <img src="https://render.githubusercontent.com/render/math?math=\sum_{j=1}^n a_{ij}x_j \leq b_i"> &nbsp;&nbsp;&nbsp; <img src="https://render.githubusercontent.com/render/math?math=(1 \leq i \leq m)">
+    - <img src="https://render.githubusercontent.com/render/math?math=x_j \geq 0"> &nbsp;&nbsp;&nbsp; <img src="https://render.githubusercontent.com/render/math?math=(1 \leq j \leq n)">
+* To get a more compact representation of linear programs, we use vectors and matrices.
+* Let <img src="https://render.githubusercontent.com/render/math?math=\mathbf{x}"> represent a (column) vector, <img src="https://render.githubusercontent.com/render/math?math=\mathbf{x} = \langle x_1 \ldots x_n \rangle^T">.
+* Define a partial ordering on the vectors in <img src="https://render.githubusercontent.com/render/math?math=\mathbb{R}^n"> by <img src="https://render.githubusercontent.com/render/math?math=\mathbf{x} \leq \mathbf{y}"> if and only if the corresponding inequalities hold coordinate-wise, i.e. if and only if <img src="https://render.githubusercontent.com/render/math?math=x_j \leq y_j"> for all <img src="https://render.githubusercontent.com/render/math?math=1 \leq j \leq n">.
+* Write the coefficients in the objective function as <img src="https://render.githubusercontent.com/render/math?math=\mathbf{c} = \langle c_1 \ldots c_n \rangle^T \in \mathbb{R}^n">, the coefficients in the constraints as an <img src="https://render.githubusercontent.com/render/math?math=m \times n"> matrix <img src="https://render.githubusercontent.com/render/math?math=A = (a_{ij})"> and the RHS values of the constraints as <img src="https://render.githubusercontent.com/render/math?math=\mathbf{b} = \langle b_1 \ldots b_m \rangle^T \in \mathbb{R}^m">.
+* The standard form can be formulated simply as:
+    - maximise <img src="https://render.githubusercontent.com/render/math?math=\mathbf{c}^T \mathbf{x}">
+    - subject to the following two (matrix-vector) constraints:
+        * <img src="https://render.githubusercontent.com/render/math?math=A \mathbf{x} \leq \mathbf{b}">
+        * <img src="https://render.githubusercontent.com/render/math?math=\mathbf{x} \geq \mathbf{0}">
+* Thus, a Linear Programming optimisation problem can be specified as a triplet (<img src="https://render.githubusercontent.com/render/math?math=A, \mathbf{b}, \mathbf{c}">) which is the form accepted by most standard LP solvers.
+* The full generality of LP problems does not appear to be handled by the standard form. LP problems could have:
+    - equality constraints,
+    - unconstrained variables (i.e. potentially negative values <img src="https://render.githubusercontent.com/render/math?math=x_i">), and
+    - absolute value constraints.
+* An **equality constraint** of the form <img src="https://render.githubusercontent.com/render/math?math=\sum_{i=1}^n a_{ij} x_i = b_i"> can be replaced by two inequalities <img src="https://render.githubusercontent.com/render/math?math=\sum_{i=1}^n a_{ij} x_i \geq b_i"> and <img src="https://render.githubusercontent.com/render/math?math=\sum_{i=1}^n a_{ij} x_i \leq b_i">. Thus, we can assume all constraints are inequalities.
+* Each occurrence of an **unconstrained variable** <img src="https://render.githubusercontent.com/render/math?math=x_j"> can be replaced by the expression <img src="https://render.githubusercontent.com/render/math?math=x_j' - x_j^*"> where <img src="https://render.githubusercontent.com/render/math?math=x_j', x_j^*"> are new variables satisfying the equality <img src="https://render.githubusercontent.com/render/math?math=x_j' \geq 0, x_j^* \geq 0">.
+* For a vector <img src="https://render.githubusercontent.com/render/math?math=\mathbf{x} = \langle x_1, \ldots, x_n \rangle^T">, we can define <img src="https://render.githubusercontent.com/render/math?math=|\mathbf{x}| = \langle |x_1|, \ldots, |x_n| \rangle^T">. Some problems are naturally translated into constraints of the form <img src="https://render.githubusercontent.com/render/math?math=|A\mathbf{x}| \leq \mathbf{b}">. This also poses no problem as we can replace such **absolute value constraints** with two linear constraints: <img src="https://render.githubusercontent.com/render/math?math=A\mathbf{x} \leq \mathbf{b}"> and <img src="https://render.githubusercontent.com/render/math?math=-A\mathbf{x} \leq \mathbf{b}">.
+* In the standard form, any vector <img src="https://render.githubusercontent.com/render/math?math=\mathbf{x}"> which satisfies the two constraints is called a **feasible solution**, regardless of what the corresponding objective value <img src="https://render.githubusercontent.com/render/math?math=\mathbf{c}^T \mathbf{x}"> might be.
+
+#### Example
+
+* **Maximise** <img src="https://render.githubusercontent.com/render/math?math=z(x_1, x_2, x_3) = 3x_1 %2B x_2 %2B 2x_3"> subject to:
+    - <img src="https://render.githubusercontent.com/render/math?math=x_1 %2B x_2 %2B 3x_3 \leq 30">
+    - <img src="https://render.githubusercontent.com/render/math?math=2x_1 %2B 2x_2 %2B 5x_3 \leq 24">
+    - <img src="https://render.githubusercontent.com/render/math?math=4x_1 %2B x_2 %2B 2x_3 \leq 36">
+    - <img src="https://render.githubusercontent.com/render/math?math=x_1, x_2, x_3 \geq 0">
+* Adding the first two inequalities gives <img src="https://render.githubusercontent.com/render/math?math=3x_1 %2B 3x_2 %2B 8x_3 \leq 54">. Since all variables are constrained to be non-negative, then we know that <img src="https://render.githubusercontent.com/render/math?math=3x_1 %2B x_2 %2B 2x_3 \leq 3x_1 %2B 3x_2 %2B 8x_3 \leq 54">, i.e. the objective does not exceed 54. Can we do better?
+* We try to look for coefficients <img src="https://render.githubusercontent.com/render/math?math=y_1, y_2, y_3 \geq 0"> to be used to form a linear combination of the constraints:
+    - <img src="https://render.githubusercontent.com/render/math?math=y_1 (x_1 %2B x_2 %2B 3x_3) \leq 30y_1">
+    - <img src="https://render.githubusercontent.com/render/math?math=y_2 (2x_1 %2B 2x_2 %2B 5x_3) \leq 24y_2">
+    - <img src="https://render.githubusercontent.com/render/math?math=y_3 (4x_1 %2B x_2 %2B 2x_3) \leq 36y_3">
+* Summing up all these inequalities and factoring, we get <img src="https://render.githubusercontent.com/render/math?math=x_1(y_1 %2B 2y_2 %2B 4y_3) %2B x_2(y_1 %2B 2y_2 %2B y_3) %2B x_3(3y_1 %2B 5y_2 %2B 2y_3) \leq 30y_1 %2B 24y_2 %2B 36y_3">.
+* If we compare this to our objective, we see that if we choose <img src="https://render.githubusercontent.com/render/math?math=y_1, y_2, y_3"> such that:
+    - <img src="https://render.githubusercontent.com/render/math?math=y_1 %2B 2y_2 %2B 4y_3 \geq 3">
+    - <img src="https://render.githubusercontent.com/render/math?math=y_1 %2B 2y_2 %2B y_3 \geq 1">
+    - <img src="https://render.githubusercontent.com/render/math?math=3y_1 %2B 5y_2 %2B 2y_3 \geq 2">
+* then <img src="https://render.githubusercontent.com/render/math?math=3x_1 %2B x_2 %2B 2x_3 \leq x_1(y_1 %2B 2y_2 %2B 4y_3) %2B x_2(y_1 %2B 2y_2 %2B y_3) %2B x_3(3y_1 %2B 5y_2 %2B 2y_3)">.
+* Combining this with the above inequalities, we get <img src="https://render.githubusercontent.com/render/math?math=30y_1 %2B 24y_2 %2B 36y_3 \geq 3x_1 %2B x_2 %2B 2x_3 = z(x_1, x_2, x_3)">.
+* Consequently, in order to find a tight upper bound for our objective <img src="https://render.githubusercontent.com/render/math?math=z(x_1, x_2, x_3)"> in the original problem <img src="https://render.githubusercontent.com/render/math?math=P">, we have to find <img src="https://render.githubusercontent.com/render/math?math=y_1, y_2, y_3"> which solve problem <img src="https://render.githubusercontent.com/render/math?math=P^*">:
+    - **Minimise** <img src="https://render.githubusercontent.com/render/math?math=z^* (y_1, y_2, y_3) = 30y_1 %2B 24y_2 %2B 36y_3"> subject to:
+        * <img src="https://render.githubusercontent.com/render/math?math=y_1 %2B 2y_2 %2B 4y_3 \geq 3">
+        * <img src="https://render.githubusercontent.com/render/math?math=y_1 %2B 2y_2 %2B y_3 \geq 1">
+        * <img src="https://render.githubusercontent.com/render/math?math=3y_1 %2B 5y_2 %2B 2y_3 \geq 2">
+        * <img src="https://render.githubusercontent.com/render/math?math=y_1, y_2, y_3 \geq 0">
+* Then, <img src="https://render.githubusercontent.com/render/math?math=z^* (y_1, y_2, y_3) = 30y_1 %2B 24y_2 %2B 36y_3 \geq 3x_1 %2B x_2 %2B 2x_3 = z(x_1, x_2, x_3)"> will be a tight upper bound.
+* This new problem <img src="https://render.githubusercontent.com/render/math?math=P^*"> is called the **dual problem** of <img src="https://render.githubusercontent.com/render/math?math=P">.
+* We repeat the whole procedure to find the dual of <img src="https://render.githubusercontent.com/render/math?math=P^*">, denoted <img src="https://render.githubusercontent.com/render/math?math=(P^*)^*">. We are now looking for <img src="https://render.githubusercontent.com/render/math?math=z_1, z_2, z_3 \geq 0"> to obtain:
+    - <img src="https://render.githubusercontent.com/render/math?math=z_1(y_1 %2B 2y_2 %2B 4y_3) \geq 3z_1">
+    - <img src="https://render.githubusercontent.com/render/math?math=z_2(y_1 %2B 2y_2 %2B y_3) \geq z_2">
+    - <img src="https://render.githubusercontent.com/render/math?math=z_3(3y_1 %2B 5y_2 %2B 2y_3) \geq 2z_3">
+* Summing these up and factorising we get <img src="https://render.githubusercontent.com/render/math?math=y_1(z_1 %2B z_2 %2B 3z_3) %2B y_2(2z_1 %2B 2z_2 %2B 5z_3) %2B y_3(4z_1 %2B z_2 %2B 2z_3) \geq 3z_1 %2B z_2 %2B 2z_3">.
+* If we choose multipliers <img src="https://render.githubusercontent.com/render/math?math=z_1, z_2, z_3"> such that:
+    - <img src="https://render.githubusercontent.com/render/math?math=z_1 %2B z_3 %2B 3z_3 \leq 30">
+    - <img src="https://render.githubusercontent.com/render/math?math=2z_1 %2B 2z_3 %2B 5z_3 \leq 24">
+    - <img src="https://render.githubusercontent.com/render/math?math=4z_1 %2B z_3 %2B 2z_3 \leq 36">
+* then <img src="https://render.githubusercontent.com/render/math?math=y_1(z_1 %2B z_2 %2B 3z_3) %2B y_2(2z_1 %2B 2z_2 %2B 5z_3) %2B y_3(4z_1 %2B z_2 %2B 2z_3) \leq 30y_1 %2B 24y_2 %2B 36y_3">.
+* Combining this with the above we get <img src="https://render.githubusercontent.com/render/math?math=3z_1 %2B z_2 %2B 2z_3 \leq 30y_1 %2B 24y_2 %2B 36y_3">.
+* Consequently, finding the double dual program <img src="https://render.githubusercontent.com/render/math?math=(P^*)^*"> amounts to **maximising** the objective <img src="https://render.githubusercontent.com/render/math?math=3z_1 %2B z_2 %2B 2z_3"> subject to the constraints:
+    - <img src="https://render.githubusercontent.com/render/math?math=z_1 %2B z_2 %2B 3z_3 \leq 30">
+    - <img src="https://render.githubusercontent.com/render/math?math=2z_1 %2B 2z_2 %2B 5z_3 \leq 24">
+    - <img src="https://render.githubusercontent.com/render/math?math=4z_1 %2B z_2 %2B 2z_3 \leq 36">
+* Thus, the double dual program <img src="https://render.githubusercontent.com/render/math?math=(P^*)^*"> is just <img src="https://render.githubusercontent.com/render/math?math=P"> itself.
+* Recall that the **Ford-Fulkerson algorithm** produces a **maximum flow** by showing that it terminates only when we reach the capacity of a **minimal cut**. Looking for the multipliers <img src="https://render.githubusercontent.com/render/math?math=y_1, y_2, y_3"> reduced a maximisation problem to an equally hard minimisation problem.
+* In general, the **primal** Linear Program <img src="https://render.githubusercontent.com/render/math?math=P"> and its **dual** <img src="https://render.githubusercontent.com/render/math?math=P^*"> are:
+
+![linear-prog](images/linear-prog.png)
+![linear-prog](images/linear-prog-1.png)
+
+### Weak Duality Theorem
+
+> If <img src="https://render.githubusercontent.com/render/math?math=x = \langle x_1 \ldots x_n \rangle"> is any feasible solution for <img src="https://render.githubusercontent.com/render/math?math=P"> and <img src="https://render.githubusercontent.com/render/math?math=y = \langle y_1 \ldots y_m \rangle"> is any feasible solution for <img src="https://render.githubusercontent.com/render/math?math=P^*">, then:
+>
+> <img src="https://render.githubusercontent.com/render/math?math=z(x) = \sum_{j=1}^n c_j x_j \leq \sum_{i=1}^m b_i y_i = z^*(y)"> **(proof omitted)**.
+
+* Thus, the value of (the objective of <img src="https://render.githubusercontent.com/render/math?math=P^*"> for) any feasible solution of <img src="https://render.githubusercontent.com/render/math?math=P^*"> is an upper bound for the set of all values of (the objective of <img src="https://render.githubusercontent.com/render/math?math=P"> for) all feasible solutions of <img src="https://render.githubusercontent.com/render/math?math=P">, and every feasible solution of <img src="https://render.githubusercontent.com/render/math?math=P"> is a lower bound for the set of feasible solutions for <img src="https://render.githubusercontent.com/render/math?math=P^*">.
+* If we find a feasible solution for <img src="https://render.githubusercontent.com/render/math?math=P"> which is equal to a feasible solution to <img src="https://render.githubusercontent.com/render/math?math=P^*">, this common value must be the **maximal feasible value** of the objective of <img src="https://render.githubusercontent.com/render/math?math=P"> and the **minimal feasible value** of the objective of <img src="https://render.githubusercontent.com/render/math?math=P^*">.
+
+## Intractability
+
+### Feasibility of Algorithms
+
+* A (sequential) algorithm is said to be **polynomial time** if for every input it terminates in polynomially many steps in the length of the input.
+* The **length of an input** is the *number of symbols* needed to describe the input precisely.
+
+#### Decision Problems and Class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}">
+
+* A **decision problem** is a problem with a YES or NO answer.
+* A decision problem <img src="https://render.githubusercontent.com/render/math?math=A(x)"> is in class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}"> (*polynomial time*, denoted <img src="https://render.githubusercontent.com/render/math?math=A \in \mathbf{P}"> if there exists a polynomial time algorithm which solves it.
+
+#### Class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">
+
+* A decision problem <img src="https://render.githubusercontent.com/render/math?math=A(x)"> is in class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> (*non-deterministic polynomial time*, denoted <img src="https://render.githubusercontent.com/render/math?math=A \in \mathbf{NP}">) if there exists a problem <img src="https://render.githubusercontent.com/render/math?math=B(x,y)"> such that:
+    1. for every input <img src="https://render.githubusercontent.com/render/math?math=x">, <img src="https://render.githubusercontent.com/render/math?math=A(x)"> is true if and only if there is some <img src="https://render.githubusercontent.com/render/math?math=y"> for which <img src="https://render.githubusercontent.com/render/math?math=B(x,y)"> is true, and
+    2. the truth of <img src="https://render.githubusercontent.com/render/math?math=B(x,y)"> can be verified by an algorithm running in polynomial time in the length of <img src="https://render.githubusercontent.com/render/math?math=x"> only.
+* We call <img src="https://render.githubusercontent.com/render/math?math=y"> a **certificate** for <img src="https://render.githubusercontent.com/render/math?math=x"> and <img src="https://render.githubusercontent.com/render/math?math=B"> a **certifier**.
+* Class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problems are problems that can be **verified in polynomial time** whereas Class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}"> problems are problems that can be **solved in polynomial time**.
+* For example, consider the decision problem <img src="https://render.githubusercontent.com/render/math?math=A(x) ="> "integer <img src="https://render.githubusercontent.com/render/math?math=x"> is not prime". Then we need to find a problem <img src="https://render.githubusercontent.com/render/math?math=B(x,y)"> such that <img src="https://render.githubusercontent.com/render/math?math=A(x)"> is true if and only if there is some <img src="https://render.githubusercontent.com/render/math?math=y"> for which <img src="https://render.githubusercontent.com/render/math?math=B(x,y)"> is true. Naturally, <img src="https://render.githubusercontent.com/render/math?math=B(x,y) ="> "<img src="https://render.githubusercontent.com/render/math?math=x"> is divisibe by <img src="https://render.githubusercontent.com/render/math?math=y">". <img src="https://render.githubusercontent.com/render/math?math=B(x,y)"> can indeed be verified by an algorithm running in polynomial time in the length of <img src="https://render.githubusercontent.com/render/math?math=x"> only.
+
+#### <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}"> vs <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">
+
+* Is it the case that *every* problem in <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> is also in <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}">?
+* The conjecture that <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> is a strictly larger class of decision problems than <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}"> is known as the "<img src="https://render.githubusercontent.com/render/math?math=\mathbf{P} \neq \mathbf{NP}">" hypothesis, and it is widely considered to be one of the hardest open problems in mathematics.
+
+### Polynomial Reductions
+
+* Let <img src="https://render.githubusercontent.com/render/math?math=U"> and <img src="https://render.githubusercontent.com/render/math?math=V"> be two decision problems. We say that <img src="https://render.githubusercontent.com/render/math?math=U"> is **polynomially reducible** to <img src="https://render.githubusercontent.com/render/math?math=V"> if and only if there exists a function <img src="https://render.githubusercontent.com/render/math?math=f(x)"> such that:
+    1. <img src="https://render.githubusercontent.com/render/math?math=f(x)"> maps instances of <img src="https://render.githubusercontent.com/render/math?math=U"> into instances of <img src="https://render.githubusercontent.com/render/math?math=V">.
+    2. <img src="https://render.githubusercontent.com/render/math?math=f"> maps YES instances of <img src="https://render.githubusercontent.com/render/math?math=U"> to YES instances of <img src="https://render.githubusercontent.com/render/math?math=V"> and NO instances of <img src="https://render.githubusercontent.com/render/math?math=U"> to NO instances of <img src="https://render.githubusercontent.com/render/math?math=V">, i.e. <img src="https://render.githubusercontent.com/render/math?math=U(x)"> is YES if and only if <img src="https://render.githubusercontent.com/render/math?math=V(f(x))"> is YES.
+    3. <img src="https://render.githubusercontent.com/render/math?math=f(x)"> is computable by a polynomial time algorithm.
+
+#### Cook's Theorem
+
+> Every <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem is polynomially reducible to the SAT problem.
+
+* **SAT problem:**
+
+![sat-problem](images/sat-problem.png)
+
+* There are <img src="https://render.githubusercontent.com/render/math?math=2^n"> cases to consider in the SAT problem.
+* The SAT problem is in class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> since given an evaluation of the propositional variables one can determine in polynomial time whether the formula is true for such an evaluation.
+    - If each clause <img src="https://render.githubusercontent.com/render/math?math=C_i"> involves exactly two variables (**2SAT**), then we are in class <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P}">.
+* This means that for every <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> decision problem <img src="https://render.githubusercontent.com/render/math?math=U(x)"> there exists a polynomial time computable function <img src="https://render.githubusercontent.com/render/math?math=f(x)"> such that:
+    1. for every instance <img src="https://render.githubusercontent.com/render/math?math=x"> of <img src="https://render.githubusercontent.com/render/math?math=U">, <img src="https://render.githubusercontent.com/render/math?math=f(x)"> produces a propositional formula <img src="https://render.githubusercontent.com/render/math?math=\Phi_x">;
+    2. <img src="https://render.githubusercontent.com/render/math?math=U(x)"> is true if and only if <img src="https://render.githubusercontent.com/render/math?math=\Phi_x"> is satisfiable.
+
+#### <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete
+
+* An <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> decision problem <img src="https://render.githubusercontent.com/render/math?math=U"> is <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete (<img src="https://render.githubusercontent.com/render/math?math=U \in \mathbf{NP}">-<img src="https://render.githubusercontent.com/render/math?math=\mathbf{C}">) if every other <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem is polynomially reducible to <img src="https://render.githubusercontent.com/render/math?math=U">.
+* Thus, Cook's theorem says that SAT is <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete.
+* <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete problems are the hardest <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problems since a polynomial time algorithm for solving an <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete problem would make every other <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem also solvable in polynomial time.
+* But if <img src="https://render.githubusercontent.com/render/math?math=\mathbf{P} \neq \mathbf{NP}"> (as commonly hypothesised), then there cannot be any polynomial time algorithms for solving an <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete problem.
+
+#### Proving <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-completeness
+
+> Let <img src="https://render.githubusercontent.com/render/math?math=U"> be an <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete problem, and let <img src="https://render.githubusercontent.com/render/math?math=V"> be another <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem. If <img src="https://render.githubusercontent.com/render/math?math=U"> is polynomially reducible to <img src="https://render.githubusercontent.com/render/math?math=V">, then <img src="https://render.githubusercontent.com/render/math?math=V"> is also <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete **(proof omitted)**.
+
+#### Reducing 3SAT to VC
+
+* We want to find a polynomial time reduction from 3SAT to **Vertex Cover (VC)**.
+
+![vertex-cover](images/vertex-cover.png)
+![3sat-to-vc](images/3sat-to-vc.png)
+
+* An instance of 3SAT consisting of <img src="https://render.githubusercontent.com/render/math?math=M"> clauses and <img src="https://render.githubusercontent.com/render/math?math=N"> propositional variables is satisfiable if and only if the corresponding graph has a vertex cover of size at most <img src="https://render.githubusercontent.com/render/math?math=2M %2B N"> **(proof omitted)**.
+
+### Optimisation Problems
+
+#### <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-hard Problems
+
+* Let <img src="https://render.githubusercontent.com/render/math?math=A"> be a problem and suppose we have a "black box" device which for every input <img src="https://render.githubusercontent.com/render/math?math=x"> instantaneously computes <img src="https://render.githubusercontent.com/render/math?math=A(x)">.
+* We consider algorithms which are *polynomial time in <img src="https://render.githubusercontent.com/render/math?math=A">*. This means algorithms which run in polynomial time in the length of the input and which, besides the usual computational steps, can also use the above mentioned "black box".
+* We say that a problem <img src="https://render.githubusercontent.com/render/math?math=A"> is <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-hard (<img src="https://render.githubusercontent.com/render/math?math=A \in \mathbf{NP}">-<img src="https://render.githubusercontent.com/render/math?math=\mathbf{H}">) if every <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem is polynomial time in <img src="https://render.githubusercontent.com/render/math?math=A">, i.e. if we can solve every <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem <img src="https://render.githubusercontent.com/render/math?math=U"> using a polynomial time algorithm which can also use a black box to solve any instance of <img src="https://render.githubusercontent.com/render/math?math=A">.
+* We do not require <img src="https://render.githubusercontent.com/render/math?math=A"> to be an <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}"> problem nor a decision problem. It can also be an optimisation problem.
+* It is important to be able to figure out if a problem at hand is <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-hard in order to know that one has to abandon trying to come up with a feasible polynomial time solution.
+* All <img src="https://render.githubusercontent.com/render/math?math=\mathbf{NP}">-complete problems are equally difficult because any of them is polynomially reducible to any other. However, the related **optimisation problems** can be very different. Some of these optimisation problems allow us to get within a constant factor of the optimal answer.
+    - **Vertex Cover** permits an approximation which produces a cover at most twice as large as the minimum vertex cover.
+    - **Metric TSP** permits an approximation which produces a tour at most twice as long as the shortest tour.
